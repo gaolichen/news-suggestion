@@ -8,14 +8,16 @@ from flask_cors import CORS
 from flask_restful import abort, Api, Resource
 from local_storage import LocalStorage
 
-similarity_algorithm = 'jieba' #
+similarity_algorithm = 'jieba'
+#similarity_algorithm = 'simbert'
+#similarity_algorithm = 'spacy'
 
 if similarity_algorithm == 'simbert':
-    from similaricy_simbert import SimilarityCalc
+    from similarity_simbert import SimilarityCalc
 elif similarity_algorithm == 'jieba':
     from similarity_jieba import SimilarityCalc
 else:
-    from similarity_calc import SimilarityCalc
+    from similarity_spacy import SimilarityCalc
 
 @dataclass
 class Settings(object):

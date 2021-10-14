@@ -10,7 +10,7 @@ checkpoint_path = 'E:/deeplearning-data/simbert/chinese_simbert_L-4_H-312_A-12/b
 dict_path = 'E:/deeplearning-data/simbert/chinese_simbert_L-4_H-312_A-12/vocab.txt'
 
 class SimilarityCalc(object):
-    def __init__(self, ref_texts, topk):
+    def __init__(self, ref_texts, topk = 10):
         self.ref_texts = ref_texts
         self.topk = topk
         self.tokenizer = Tokenizer(dict_path, do_lower_case=True) 
