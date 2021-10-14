@@ -93,12 +93,12 @@ class LocalStorage(object):
         cnx, cursor = self._get_sqlite_conn()
         try:
             if visited is None or visited:
-                query_str = f"SELECT href, title, last_visited, created FROM {self.table_name} WHERE last_visited > 0 LIMIT {topk}"
+                query_str = f"SELECT href, title, last_visited, created FROM {self.table_name} WHERE last_visited > 0 ORDER BY ID DESC LIMIT {topk}"
                 cursor.execute(query_str)
                 rows = cursor.fetchall()
 
             if visited is None or not visited:
-                query_str = f"SELECT href, title, last_visited, createdFROM {self.table_name} WHERE last_visited = 0 LIMIT {topk}"
+                query_str = f"SELECT href, title, last_visited, created FROM {self.table_name} WHERE last_visited = 0 ORDER BY ID DESC LIMIT {topk}"
                 cursor.execute(query_str)
                 rows.extend(rows)
 

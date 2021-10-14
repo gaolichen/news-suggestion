@@ -7,7 +7,15 @@ from flask import Flask, request
 from flask_cors import CORS
 from flask_restful import abort, Api, Resource
 from local_storage import LocalStorage
-from similarity_calc import SimilarityCalc
+
+similarity_algorithm = 'jieba' #
+
+if similarity_algorithm == 'simbert':
+    from similaricy_simbert import SimilarityCalc
+elif similarity_algorithm == 'jieba':
+    from similarity_jieba import SimilarityCalc
+else:
+    from similarity_calc import SimilarityCalc
 
 @dataclass
 class Settings(object):
@@ -15,6 +23,17 @@ class Settings(object):
     table_name: str = 'news_record'
 
 settings = Settings()
+
+storage = LocalStorage(settings.db_name, settings.table_name)
+storage.init_db()
+storage.import_from_browser_history()
+
+def create_similarity_calc(storage):
+    visited = storage.retrieve(visited = True, topk = 2000)
+    ref_texts = [ref['title'] for ref in visited]
+    return SimilarityCalc(ref_texts)
+
+similarity_calc = create_similarity_calc(storage)
 
 def normalize(contents):
     for content in contents:
@@ -27,8 +46,6 @@ class SaveToDatabase(Resource):
     def __init__(self):
         super(SaveToDatabase, self).__init__()
 
-        self.similarity_calc = SimilarityCalc()
-
     def put(self):
         data = request.get_json()
         content = data['content']
@@ -37,7 +54,6 @@ class SaveToDatabase(Resource):
 
         if len(content) > 0:
             normalize(content)
-            storage = LocalStorage(settings.db_name, settings.table_name)
             storage.save(content, ignore_if_exists)
 
             visited, unvisited = storage.count_pages()
@@ -50,13 +66,10 @@ class SaveToDatabase(Resource):
         # and we need to return which news to highlight
         if ignore_if_exists == 1:
             unvisited = storage.get_unvisited(site, topk = 100)
-            visited = storage.retrieve(visited = True, topk = 1000)
-
             unvisited_text = [news['title'] for news in unvisited]
-            visited_text = [news['title'] for news in visited]
 
             print('computing similarity...')
-            scores = self.similarity_calc.compute(unvisited_text, visited_text, topk = 10)
+            scores = similarity_calc.compute(unvisited_text)
             print('finished computing similarity')
 
             entries = [(news['href'], score) for news, score in zip(unvisited, scores)]
@@ -78,9 +91,4 @@ def start_app(debug = False):
     app.run(debug = debug)
 
 if __name__ == '__main__':    
-    storage = LocalStorage(settings.db_name, settings.table_name)
-    storage.init_db()
-    storage.import_from_browser_history()
-
     start_app(debug=True)
-        
