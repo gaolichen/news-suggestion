@@ -18,7 +18,6 @@
 
 ## 安装
 - 在server目录下，运行命令行 `pip install -r requirements.txt`
-- 运行命令行`python -m spacy download zh_core_web_sm`
 - 安装[油猴](https://www.tampermonkey.net/)浏览器插件
 - 打开油猴控制面板，添加`client\news suggestion.user.js`脚本：
   - 点击Utilities栏，点Import Choose File，选择`client\news suggestion.user.js`
@@ -27,4 +26,3 @@
 ## 运行
 - server目录下，运行命令行 `python news_server.py`
 - 打开浏览器，浏览支持的新闻站点
-
