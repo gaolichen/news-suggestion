@@ -26,7 +26,8 @@ def normalize_url(url):
 
 class ChromeHistory(object):
     def __init__(self):
-        pass
+        self.history_path = '\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History'
+        self.name = 'chrome'
     
     @staticmethod
     def _to_python_timestamp(ts):
@@ -38,12 +39,12 @@ class ChromeHistory(object):
     
     def get_records(self, since = None):
         # copy history file to temp directory.
-        temp_path = os.path.join(os.environ.get('TEMP'), 'chrome_history')
+        temp_path = os.path.join(os.environ.get('TEMP'), self.name + '_history')
 
         if os.path.exists(temp_path):
             os.remove(temp_path)
         
-        src_path = str(Path.home()) + '\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\History'
+        src_path = str(Path.home()) + self.history_path
 
         copyfile(src_path, temp_path)
         con = sqlite3.connect(temp_path)
@@ -60,8 +61,13 @@ class ChromeHistory(object):
         finally:
             con.close()
 
+class EdgeHistory(ChromeHistory):
+    def __init__(self):
+        self.history_path = '\\AppData\\Local\\Microsoft\Edge\\User Data\\Default\\History'
+        self.name = 'edge'
+
 if __name__ == '__main__':
-    history = ChromeHistory()
+    history = EdgeHistory()
     ts = datetime(2021, 10, 1, 0, 0)
     print(ts)
     records = history.get_records(since = ts)

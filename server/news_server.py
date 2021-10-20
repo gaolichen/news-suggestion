@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import unicodedata
 from dataclasses import dataclass
 
@@ -33,9 +34,14 @@ storage.import_from_browser_history()
 def create_similarity_calc(storage):
     visited = storage.retrieve(visited = True, topk = 2000)
     ref_texts = [ref['title'] for ref in visited]
-    return SimilarityCalc(ref_texts)
+    similaricy_calc = SimilarityCalc(ref_texts)
+    
+    scores = similaricy_calc.compute(ref_texts)
+    scores.sort()
+    return similaricy_calc, scores[len(scores)//2]
 
-similarity_calc = create_similarity_calc(storage)
+similarity_calc, similarity_threshold = create_similarity_calc(storage)
+print('similarity_threshold=', similarity_threshold)
 
 def normalize(contents):
     for content in contents:
@@ -74,8 +80,11 @@ class SaveToDatabase(Resource):
             scores = similarity_calc.compute(unvisited_text)
             print('finished computing similarity')
 
-            entries = [(news['href'], score) for news, score in zip(unvisited, scores)]
+            entries = [(news['href'], score) for news, score in zip(unvisited, scores) if score > similarity_threshold]
             entries.sort(key = lambda x: -x[1])
+            if len(entries) > 20:
+                entries = entries[:20]
+            print('no. of unvisited entries: ', len(entries))
             ret = [{'href': entry[0], 'score': entry[1]} for entry in entries]
 
         return ret, 200

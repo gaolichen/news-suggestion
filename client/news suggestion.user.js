@@ -44,7 +44,7 @@ class NewsSite {
 
     highlight(urlsToHightlight) {
         let urls = [];
-        for (let i = 0; i < urlsToHightlight.length && i < 10; i++) {
+        for (let i = 0; i < urlsToHightlight.length; i++) {
             console.log('highlighting ' + urlsToHightlight[i].href + ' ' + urlsToHightlight[i].score);
             urls.push(urlsToHightlight[i].href);
         }
@@ -68,7 +68,7 @@ class NewsSite {
     }
 }
 
-let sinaSections = ['要闻', '体育', '娱乐', '科技', '财经'];
+let sinaSections = ['要闻', '体育', 'NBA', '娱乐', '科技', '探索', '财经', '股票', '博客', '文史', 'guess'];
 class SinaNews extends NewsSite {
     constructor() {
         super('sina.com');
@@ -87,17 +87,20 @@ class SinaNews extends NewsSite {
 
     queryNewsLinks(onFound) {
         for (let i = 0; i < sinaSections.length; i++) {
-            let elem = document.querySelectorAll('div[blktitle=' + sinaSections[i] + ']');
+            let elem = null;
+            if (sinaSections[i] == 'guess') {
+                elem = document.getElementById('SI_Guess_Wrap');
+            } else if (sinaSections[i] == '要闻') {
+                // need special handing as there are hidden elements should not be retrieved.
+                elem = document.getElementById('newslist_a')
+            } else {
+                elem = document.querySelector('div[blktitle=' + sinaSections[i] + ']');
+            }
+
             if (!elem) {
                 continue;
             }
-            let links = null;
-            // need special handing as there are hidden elements should not be retrieved.
-            if (sinaSections[i] == '要闻') {
-                links = document.getElementById('newslist_a').querySelectorAll('ul > li > a');
-            } else {
-                links = elem[0].querySelectorAll('ul > li > a');
-            }
+            let links = elem.querySelectorAll('ul > li > a');
             console.log(sinaSections[i] + " " + links.length);
             for (let j = 0; j < links.length; j++) {
                 onFound(links[j].href, links[j]);
@@ -312,6 +315,6 @@ function process() {
 //window.addEventListener('load', function() {
     'use strict';
     //clearData();
-    setTimeout(() => process(), 2000);
+    setTimeout(() => process(), 1000);
 //}, false);
 })();

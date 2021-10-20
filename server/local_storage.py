@@ -1,7 +1,7 @@
 import os
 import sqlite3
 
-from browser_history import ChromeHistory
+from browser_history import ChromeHistory, EdgeHistory
 from news_sites import all_news_sites
 
 current = os.path.dirname(os.path.realpath(__file__))
@@ -51,7 +51,7 @@ class LocalStorage(object):
     
     def import_from_browser_history(self):
         print('importing news from history...')
-        browers = [ChromeHistory()]
+        browers = [ChromeHistory(), EdgeHistory()]
         for browser in browers:
             try:
                 records = record_from_browser_history(browser)
